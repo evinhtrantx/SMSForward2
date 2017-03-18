@@ -30,14 +30,14 @@ public class DespatchServiceImpl extends IntentService {
                 " WHERE status = 'A' ORDER BY id ASC";
         Cursor cursor = msgDb.rawQuery(unsentMsgQuery,null);
         Log.d("DespatchService","queried onto Database");
-        if(!cursor.isAfterLast() && ! cursor.isBeforeFirst()) {
+        if(!cursor.isBeforeFirst() && !cursor.isAfterLast()) {
             int idxId = cursor.getColumnIndex("id");
             int idxFrNo = cursor.getColumnIndex("fr_no");
             int idxToNo = cursor.getColumnIndex("to_no");
             int idxMsg = cursor.getColumnIndex("content");
             List<String> updatedIds = new ArrayList<String>();
             StringBuilder args = new StringBuilder();
-            while (!cursor.isAfterLast() && ! cursor.isBeforeFirst()) {
+            while (!cursor.isBeforeFirst() && !cursor.isAfterLast()) {
                 String msg = cursor.getString(idxMsg);
                 String frNo = cursor.getString(idxFrNo);
                 String toNo = cursor.getString(idxToNo);
