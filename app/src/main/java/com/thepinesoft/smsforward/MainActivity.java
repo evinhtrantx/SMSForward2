@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.ToggleButton;
 
 import com.thepinesoft.smsforward.fw.DespatchServiceImpl;
+import com.thepinesoft.smsforward.global.Autowired;
 
 import java.io.Console;
 
@@ -20,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
     }
     public void onClick(View onOffListen){
         ToggleButton onOffButton = (ToggleButton) onOffListen;
+        Autowired.setContext(getApplicationContext());
         if(onOffButton.isChecked()){
             getApplicationContext().startService(new Intent(getApplicationContext(),DespatchServiceImpl.class));
 

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.telephony.SmsManager;
+import android.util.Log;
 
 import com.thepinesoft.smsforward.global.Autowired;
 
@@ -28,14 +29,15 @@ public class DespatchServiceImpl extends IntentService {
         String unsentMsgQuery = "SELECT id, content, fr_no, to_no, fr_email, to_email, status FROM msg" +
                 " WHERE status = 'A' ORDER BY id ASC";
         Cursor cursor = msgDb.rawQuery(unsentMsgQuery,null);
-        if(!cursor.isLast()) {
+        Log.d("DespatchService","queried onto Database");
+        if(!cursor.isAfterLast() && ! cursor.isBeforeFirst()) {
             int idxId = cursor.getColumnIndex("id");
             int idxFrNo = cursor.getColumnIndex("fr_no");
             int idxToNo = cursor.getColumnIndex("to_no");
             int idxMsg = cursor.getColumnIndex("content");
             List<String> updatedIds = new ArrayList<String>();
             StringBuilder args = new StringBuilder();
-            while (!cursor.isLast()) {
+            while (!cursor.isAfterLast() && ! cursor.isBeforeFirst()) {
                 String msg = cursor.getString(idxMsg);
                 String frNo = cursor.getString(idxFrNo);
                 String toNo = cursor.getString(idxToNo);

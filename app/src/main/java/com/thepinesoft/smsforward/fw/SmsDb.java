@@ -11,12 +11,13 @@ import com.thepinesoft.smsforward.global.Autowired;
 
 public class SmsDb extends SQLiteOpenHelper{
     public SmsDb(){
-        super(Autowired.getContext(),"SMSFORWARDDB",null,0);
+        super(Autowired.getContext(),"SMSFORWARDDB1",null,2);
     }
     @Override
     public void onCreate(SQLiteDatabase db) {
         String sqlcreate = "CREATE TABLE msg(id INTEGER PRIMARY KEY AUTOINCREMENT, content VARCHAR(255), fr_no VARCHAR(50), " +
                 " to_no VARCHAR(50), fr_email VARCHAR(50), to_email VARCHAR(50), status CHAR(1))";
+        db.execSQL(sqlcreate);
     }
 
     @Override
