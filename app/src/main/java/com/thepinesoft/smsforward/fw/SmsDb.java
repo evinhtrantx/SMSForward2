@@ -13,6 +13,10 @@ public class SmsDb extends SQLiteOpenHelper{
     public SmsDb(){
         super(Autowired.getContext(),"SMSFORWARDDB1",null,2);
     }
+
+    public final static String STATUS_UNREAD = "A";
+    public final static String STATUS_SENT = "S";
+    public final static String TABLE_NAME = "msg";
     @Override
     public void onCreate(SQLiteDatabase db) {
         String sqlcreate = "CREATE TABLE msg(id INTEGER PRIMARY KEY AUTOINCREMENT, content VARCHAR(255), fr_no VARCHAR(50), " +

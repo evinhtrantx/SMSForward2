@@ -6,13 +6,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.thepinesoft.smsforward.fw.SmsDb;
 
-import junit.framework.Assert;
 
 /**
  * Created by vtran on 8/3/17.
  */
 
-public abstract class Autowired {
+public class Autowired {
     private static Context context = null;
     private static SQLiteDatabase db = null;
     public static Context getContext(){
@@ -22,7 +21,7 @@ public abstract class Autowired {
         if(context == null) {
             context = c;
         }
-    };
+    }
     public static SQLiteDatabase getMsgDatabase(){
         if(db == null) {
             SQLiteOpenHelper helper = new SmsDb();
