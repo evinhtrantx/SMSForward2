@@ -1,9 +1,12 @@
 package com.thepinesoft.smsforward.fw;
 
 
+import android.app.IntentService;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.Settings;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.sun.mail.imap.IMAPBodyPart;
@@ -27,10 +30,43 @@ import javax.mail.Session;
  * Created by FRAMGIA\tran.xuan.vinh on 28/03/2017.
  */
 
-public class PullEmailServiceImpl {
+public class PullEmailServiceImpl extends IntentService{
+    public PullEmailServiceImpl(){
+        super("PullEmailService");
+    }
     private String host;
     private String username;
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     private String password;
+
+    @Override
+    protected void onHandleIntent(@Nullable Intent intent) {
+        pull();
+    }
 
     private enum Type {
         POP3, IMAP
