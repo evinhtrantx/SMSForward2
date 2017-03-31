@@ -65,7 +65,7 @@ public class PullEmailServiceImpl extends IntentService{
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        pull();
+        execute(null);
     }
 
     private enum Type {
@@ -76,18 +76,12 @@ public class PullEmailServiceImpl extends IntentService{
     private SQLiteDatabase smsDb;
     private Type type;
 
-    public enum ErrorCode {
-        no_mail_provider,
-        inbox_folder_not_found,
-        mail_exception,
-        OK,
-    }
 
     ;
     private final String messageTitleExtractor = "(\\+*[0-9]+)\\s+(.*)";
     private final Pattern extractor = Pattern.compile(messageTitleExtractor);
 
-    public ErrorCode pull() {
+    public ServiceErrorCode execute(ContentValues params) {
         smsDb = Autowired.getMsgDatabase();
         Properties props = new Properties();
         props.setProperty("mail.pop3.host", host);
@@ -104,9 +98,9 @@ public class PullEmailServiceImpl extends IntentService{
         try {
             store = (POP3Store) session.getStore();
         } catch (NoSuchProviderException e) {
-            return ErrorCode.no_mail_provider;
+            return ServiceErrorCode.no_mail_provider;
         } catch (ClassCastException e) {
-            return ErrorCode.inbox_folder_not_found;
+            return ServiceErrorCode.inbox_folder_not_found;
         }
         POP3Folder inbox;
         try {
@@ -135,10 +129,10 @@ public class PullEmailServiceImpl extends IntentService{
             }
             inbox.close(true);
         } catch (MessagingException e) {
-            return ErrorCode.mail_exception;
+            return ServiceErrorCode.mail_exception;
         }
 
-        return ErrorCode.OK;
+        return ServiceErrorCode.OK;
     }
 
 }

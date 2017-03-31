@@ -25,6 +25,10 @@ public class DespatchServiceImpl extends IntentService {
     }
     @Override
     protected void onHandleIntent(Intent intent) {
+        execute(null);
+    }
+
+    public void execute(ContentValues params){
         SQLiteDatabase msgDb = Autowired.getMsgDatabase();
         String unsentMsgQuery = "SELECT id, content, fr_no, to_no, fr_email, to_email, status FROM msg" +
                 " WHERE status = 'A' ORDER BY id ASC";
