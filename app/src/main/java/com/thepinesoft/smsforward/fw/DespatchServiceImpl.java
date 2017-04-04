@@ -28,7 +28,7 @@ public class DespatchServiceImpl extends IntentService {
         execute(null);
     }
 
-    public void execute(ContentValues params){
+    public ServiceErrorCode execute(ContentValues params){
         SQLiteDatabase msgDb = Autowired.getMsgDatabase();
         String unsentMsgQuery = "SELECT id, content, fr_no, to_no, fr_email, to_email, status FROM msg" +
                 " WHERE status = 'A' ORDER BY id ASC";
@@ -59,5 +59,6 @@ public class DespatchServiceImpl extends IntentService {
             }
             cursor.close();
         }
+        return ServiceErrorCode.OK;
     }
 }
