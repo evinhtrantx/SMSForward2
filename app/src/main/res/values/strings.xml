@@ -3,4 +3,6 @@
     <string name="listen_on">Listening</string>
     <string name="listen_off">Waiting</string>
     <string name="send_out_pending_sms">Sending out all pending SMS</string>
+    <string name="pull_email_service">Pull Email Service</string>
+    <string name="start_listening">Start Listening</string>
 </resources>
