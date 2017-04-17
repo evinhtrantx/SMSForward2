@@ -10,4 +10,5 @@ public enum ServiceErrorCode {
     no_mail_provider,
     inbox_folder_not_found,
     mail_exception,
+    mail_connection_error,
 }

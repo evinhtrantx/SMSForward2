@@ -17,7 +17,7 @@ import java.util.List;
  * Created by vtran on 8/3/17.
  */
 
-public class DespatchServiceImpl extends IntentService {
+public class DespatchServiceImpl extends IntentService  implements ApplicationService{
     private final SmsManager smsManager;
     public DespatchServiceImpl(){
         super("EmailToSMSService");
@@ -28,6 +28,7 @@ public class DespatchServiceImpl extends IntentService {
         execute(null);
     }
 
+    @Override
     public ServiceErrorCode execute(ContentValues params){
         SQLiteDatabase msgDb = Autowired.getMsgDatabase();
         String unsentMsgQuery = "SELECT id, content, fr_no, to_no, fr_email, to_email, status FROM msg" +
@@ -40,7 +41,7 @@ public class DespatchServiceImpl extends IntentService {
                 //int idxFrNo = cursor.getColumnIndex("fr_no");//for future use
                 int idxToNo = cursor.getColumnIndex("to_no");
                 int idxMsg = cursor.getColumnIndex("content");
-                List<String> updatedIds = new ArrayList<String>();
+                List<String> updatedIds = new ArrayList<>();
                 StringBuilder args = new StringBuilder();
                 while (!cursor.isAfterLast() && !cursor.isBeforeFirst()) {
                     String msg = cursor.getString(idxMsg);

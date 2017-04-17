@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.thepinesoft.smsforward">
-
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
@@ -22,6 +22,11 @@
             </intent-filter>
 
         </service>
-    </application>
+        <service android:name=".fw.PullEmailServiceImpl" android:exported="false" android:description="@string/pull_email_service">
+            <intent-filter>
+                <action android:name="com.thepinesoft.smsforward.PULLEMAIL"/>
+            </intent-filter>
 
+        </service>
+    </application>
 </manifest>

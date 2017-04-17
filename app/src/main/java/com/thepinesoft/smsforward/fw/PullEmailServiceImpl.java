@@ -5,11 +5,9 @@ import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.sun.mail.imap.IMAPBodyPart;
 import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Store;
 import com.thepinesoft.smsforward.global.Autowired;
@@ -30,12 +28,42 @@ import javax.mail.Session;
  * Created by FRAMGIA\tran.xuan.vinh on 28/03/2017.
  */
 
-public class PullEmailServiceImpl extends IntentService{
+public class PullEmailServiceImpl extends IntentService  implements ApplicationService{
     public PullEmailServiceImpl(){
         super("PullEmailService");
     }
+
+    public int getMaxMailDownload() {
+        return maxMailDownload;
+    }
+
+    public void setMaxMailDownload(int maxMailDownload) {
+        this.maxMailDownload = maxMailDownload;
+    }
+
+    private int maxMailDownload;
+
     private String host;
     private String username;
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
+    private String protocol;
+    public String getPort() {
+        return port;
+    }
+
+    public void setPort(String port) {
+        this.port = port;
+    }
+
+    private String port;
 
     public String getHost() {
         return host;
@@ -72,20 +100,23 @@ public class PullEmailServiceImpl extends IntentService{
         POP3, IMAP
     }
 
-    ;
-    private SQLiteDatabase smsDb;
+        private SQLiteDatabase smsDb;
     private Type type;
 
 
-    ;
-    private final String messageTitleExtractor = "(\\+*[0-9]+)\\s+(.*)";
+        private final String messageTitleExtractor = "(\\+*[0-9]+)\\s+(.*)";
     private final Pattern extractor = Pattern.compile(messageTitleExtractor);
 
+    @Override
     public ServiceErrorCode execute(ContentValues params) {
         smsDb = Autowired.getMsgDatabase();
+        if(maxMailDownload <=0){
+            maxMailDownload = 50;
+        }
         Properties props = new Properties();
         props.setProperty("mail.pop3.host", host);
         props.setProperty("mail.pop3.user", username);
+        props.setProperty("mail.store.protocol",protocol);
         Authenticator authenticator = new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
@@ -96,18 +127,22 @@ public class PullEmailServiceImpl extends IntentService{
         Session session = Session.getDefaultInstance(props, authenticator);
         POP3Store store;
         try {
-            store = (POP3Store) session.getStore();
+            store = (POP3Store) session.getStore("pop3");
+            store.connect();
         } catch (NoSuchProviderException e) {
             return ServiceErrorCode.no_mail_provider;
         } catch (ClassCastException e) {
             return ServiceErrorCode.inbox_folder_not_found;
+        } catch (MessagingException e) {
+            return ServiceErrorCode.mail_connection_error;
         }
         POP3Folder inbox;
         try {
             inbox = (POP3Folder) store.getDefaultFolder();
+            inbox.getFolder("INBOX");
             inbox.open(Folder.READ_WRITE);
             int msgCount = inbox.getSize();
-            for (int i = 0; i < msgCount; ++i) {
+            for (int i = 0; i < msgCount && i < maxMailDownload; ++i) {
                 Message message = inbox.getMessage(i);
                 if (message.isExpunged()) continue;
                 String subject = message.getSubject();//number message
