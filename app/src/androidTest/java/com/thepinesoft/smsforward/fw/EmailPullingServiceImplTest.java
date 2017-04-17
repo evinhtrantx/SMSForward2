@@ -17,7 +17,7 @@ public class EmailPullingServiceImplTest {
         PullEmailServiceImpl pullEmailService = new PullEmailServiceImpl();
         pullEmailService.setHost("pop.gmail.com");
         pullEmailService.setUsername("never.use.this.pls@gmail.com");
-        pullEmailService.setPassword("pgn98Oci");
+        pullEmailService.setPassword("3dUP0W07dQ");
         pullEmailService.setPort("995");
         pullEmailService.setProtocol("pop3s");
         ServiceErrorCode ret = pullEmailService.execute(null);

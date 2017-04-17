@@ -115,7 +115,15 @@ public class PullEmailServiceImpl extends IntentService  implements ApplicationS
         if(maxMailDownload <=0){
             maxMailDownload = 50;
         }
-        MyApplication app = (MyApplication) getApplication();
+        MyApplication app;
+        try {
+            app = (MyApplication) getApplication();
+            if (app == null) {
+                app = MyApplication.getApplication();
+            }
+        }catch(ClassCastException ex){
+            return ServiceErrorCode.cannot_get_app_reference;
+        }
         SharedPreferences prefs =  app.getApplicationPreferences();
         if(host == null){
             host = prefs.getString("mail.store.host",null);
@@ -125,6 +133,9 @@ public class PullEmailServiceImpl extends IntentService  implements ApplicationS
         }
         if(protocol == null){
             protocol =prefs.getString("mail.store.protocol","pop3s");
+        }
+        if(password == null){
+            password = prefs.getString("mail.store.password",null);
         }
         Properties props = new Properties();
         props.setProperty("mail.pop3.host", host);

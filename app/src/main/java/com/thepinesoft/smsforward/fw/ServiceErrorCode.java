@@ -11,4 +11,5 @@ public enum ServiceErrorCode {
     inbox_folder_not_found,
     mail_exception,
     mail_connection_error,
+    cannot_get_app_reference,
 }
