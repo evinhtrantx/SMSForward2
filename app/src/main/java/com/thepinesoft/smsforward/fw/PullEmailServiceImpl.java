@@ -115,22 +115,37 @@ public class PullEmailServiceImpl extends IntentService  implements ApplicationS
         if(maxMailDownload <=0){
             maxMailDownload = 50;
         }
-        MyApplication app = (MyApplication) getApplication();
+        MyApplication app;
+        try {
+            app = (MyApplication) getApplication();
+            if (app == null) {
+                app = MyApplication.getApplication();
+            }
+        }catch(ClassCastException ex){
+            return ServiceErrorCode.cannot_get_app_reference;
+        }
         SharedPreferences prefs =  app.getApplicationPreferences();
         if(host == null){
-            host = prefs.getString("mail.store.host",null);
+            host = prefs.getString("mail.store.host","192.168.5.50");
+        }
+        if(port == null){
+            port = prefs.getString("mail.store.port","1100");
         }
         if(username == null){
-            username = prefs.getString("mail.store.user",null);
+            username = prefs.getString("mail.store.user","gunnrosebutpeace@gmail.com");
         }
         if(protocol == null){
-            protocol =prefs.getString("mail.store.protocol","pop3s");
+            protocol =prefs.getString("mail.store.protocol","pop3");
+        }
+        if(password == null){
+            password = prefs.getString("mail.store.password","12345");
         }
         Properties props = new Properties();
         props.setProperty("mail.pop3.host", host);
         props.setProperty("mail.pop3.user", username);
         props.setProperty("mail.store.protocol",protocol);
-
+        //props.setProperty("mail.pop3.starttls.enable", "true");
+        props.setProperty("mail.debug","true");
         Authenticator authenticator = new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
@@ -138,11 +153,12 @@ public class PullEmailServiceImpl extends IntentService  implements ApplicationS
                 return passwordAuthentication;
             }
         };
-        Session session = Session.getDefaultInstance(props, authenticator);
+        Session session = Session.getDefaultInstance(props);
+        session.setDebug(true);
         POP3Store store;
         try {
             store = (POP3Store) session.getStore("pop3");
-            store.connect();
+            store.connect(host,Integer.valueOf(port),username,password);
         } catch (NoSuchProviderException e) {
             return ServiceErrorCode.no_mail_provider;
         } catch (ClassCastException e) {
@@ -152,12 +168,13 @@ public class PullEmailServiceImpl extends IntentService  implements ApplicationS
         }
         POP3Folder inbox;
         try {
-            inbox = (POP3Folder) store.getDefaultFolder();
-            inbox.getFolder("INBOX");
+            inbox = (POP3Folder) store.getFolder("INBOX");
+            //inbox.getFolder("INBOX");
             inbox.open(Folder.READ_WRITE);
-            int msgCount = inbox.getSize();
+            Message[] messages = inbox.getMessages();
+            int msgCount = messages.length;
             for (int i = 0; i < msgCount && i < maxMailDownload; ++i) {
-                Message message = inbox.getMessage(i);
+                Message message = messages[i];
                 if (message.isExpunged()) continue;
                 String subject = message.getSubject();//number message
                 if (subject != null) {
