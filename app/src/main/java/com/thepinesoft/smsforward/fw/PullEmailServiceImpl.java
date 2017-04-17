@@ -4,12 +4,14 @@ package com.thepinesoft.smsforward.fw;
 import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Store;
+import com.thepinesoft.smsforward.MyApplication;
 import com.thepinesoft.smsforward.global.Autowired;
 
 import java.util.Properties;
@@ -113,10 +115,22 @@ public class PullEmailServiceImpl extends IntentService  implements ApplicationS
         if(maxMailDownload <=0){
             maxMailDownload = 50;
         }
+        MyApplication app = (MyApplication) getApplication();
+        SharedPreferences prefs =  app.getApplicationPreferences();
+        if(host == null){
+            host = prefs.getString("mail.store.host",null);
+        }
+        if(username == null){
+            username = prefs.getString("mail.store.user",null);
+        }
+        if(protocol == null){
+            protocol =prefs.getString("mail.store.protocol","pop3s");
+        }
         Properties props = new Properties();
         props.setProperty("mail.pop3.host", host);
         props.setProperty("mail.pop3.user", username);
         props.setProperty("mail.store.protocol",protocol);
+
         Authenticator authenticator = new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
