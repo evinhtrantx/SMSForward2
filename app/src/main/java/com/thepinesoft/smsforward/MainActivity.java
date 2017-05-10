@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.ToggleButton;
 
 import com.thepinesoft.smsforward.fw.DespatchServiceImpl;
+import com.thepinesoft.smsforward.fw.PullEmailServiceImpl;
 import com.thepinesoft.smsforward.global.Autowired;
 
 public class MainActivity extends AppCompatActivity {
@@ -22,9 +23,11 @@ public class MainActivity extends AppCompatActivity {
 
         if(onOffButton.isChecked()){
             getApplicationContext().startService(new Intent(getApplicationContext(),DespatchServiceImpl.class));
+            getApplicationContext().startService(new Intent(getApplicationContext(), PullEmailServiceImpl.class));
 
         }else{
             getApplicationContext().stopService(new Intent(getApplicationContext(),DespatchServiceImpl.class));
+            getApplicationContext().stopService(new Intent(getApplicationContext(), PullEmailServiceImpl.class));
         }
     }
 }
