@@ -23,6 +23,11 @@
             </intent-filter>
 
         </service>
-    </application>
+        <service android:name=".fw.PullEmailServiceImpl" android:exported="false" android:description="@string/pull_email_service">
+            <intent-filter>
+                <action android:name="com.thepinesoft.smsforward.PULLEMAIL"/>
+            </intent-filter>
 
+        </service>
+    </application>
 </manifest>

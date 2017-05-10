@@ -4,14 +4,14 @@ package com.thepinesoft.smsforward.fw;
 import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.sun.mail.imap.IMAPBodyPart;
 import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Store;
+import com.thepinesoft.smsforward.MyApplication;
 import com.thepinesoft.smsforward.global.Autowired;
 
 import java.util.Properties;
@@ -30,12 +30,42 @@ import javax.mail.Session;
  * Created by FRAMGIA\tran.xuan.vinh on 28/03/2017.
  */
 
-public class PullEmailServiceImpl extends IntentService{
+public class PullEmailServiceImpl extends IntentService  implements ApplicationService{
     public PullEmailServiceImpl(){
         super("PullEmailService");
     }
+
+    public int getMaxMailDownload() {
+        return maxMailDownload;
+    }
+
+    public void setMaxMailDownload(int maxMailDownload) {
+        this.maxMailDownload = maxMailDownload;
+    }
+
+    private int maxMailDownload;
+
     private String host;
     private String username;
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
+    private String protocol;
+    public String getPort() {
+        return port;
+    }
+
+    public void setPort(String port) {
+        this.port = port;
+    }
+
+    private String port;
 
     public String getHost() {
         return host;
@@ -72,20 +102,53 @@ public class PullEmailServiceImpl extends IntentService{
         POP3, IMAP
     }
 
-    ;
-    private SQLiteDatabase smsDb;
+        private SQLiteDatabase smsDb;
     private Type type;
 
 
-    ;
-    private final String messageTitleExtractor = "(\\+*[0-9]+)\\s+(.*)";
+        private final String messageTitleExtractor = "(\\+*[0-9]+)\\s+(.*)";
     private final Pattern extractor = Pattern.compile(messageTitleExtractor);
 
+    @Override
     public ServiceErrorCode execute(ContentValues params) {
         smsDb = Autowired.getMsgDatabase();
+        if(maxMailDownload <=0){
+            maxMailDownload = 50;
+        }
+        MyApplication app;
+        try {
+            app = (MyApplication) getApplication();
+            if (app == null) {
+                app = MyApplication.getApplication();
+            }
+        }catch(ClassCastException ex){
+            return ServiceErrorCode.cannot_get_app_reference;
+        }
+        SharedPreferences prefs =  app.getApplicationPreferences();
+        if(host == null){
+            host = prefs.getString("mail.store.host","192.168.5.50");
+        }
+        if(port == null){
+            port = prefs.getString("mail.store.port","1100");
+        }
+        if(username == null){
+            username = prefs.getString("mail.store.user","gunnrosebutpeace@gmail.com");
+        }
+        if(protocol == null){
+            protocol =prefs.getString("mail.store.protocol","pop3");
+        }
+        if(password == null){
+            password = prefs.getString("mail.store.password","12345");
+        }
+        if(password == null){
+            password = prefs.getString("mail.store.password",null);
+        }
         Properties props = new Properties();
         props.setProperty("mail.pop3.host", host);
         props.setProperty("mail.pop3.user", username);
+        props.setProperty("mail.store.protocol",protocol);
+        //props.setProperty("mail.pop3.starttls.enable", "true");
+        props.setProperty("mail.debug","true");
         Authenticator authenticator = new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
@@ -93,22 +156,28 @@ public class PullEmailServiceImpl extends IntentService{
                 return passwordAuthentication;
             }
         };
-        Session session = Session.getDefaultInstance(props, authenticator);
+        Session session = Session.getDefaultInstance(props);
+        session.setDebug(true);
         POP3Store store;
         try {
-            store = (POP3Store) session.getStore();
+            store = (POP3Store) session.getStore("pop3");
+            store.connect(host,Integer.valueOf(port),username,password);
         } catch (NoSuchProviderException e) {
             return ServiceErrorCode.no_mail_provider;
         } catch (ClassCastException e) {
             return ServiceErrorCode.inbox_folder_not_found;
+        } catch (MessagingException e) {
+            return ServiceErrorCode.mail_connection_error;
         }
         POP3Folder inbox;
         try {
-            inbox = (POP3Folder) store.getDefaultFolder();
+            inbox = (POP3Folder) store.getFolder("INBOX");
+            //inbox.getFolder("INBOX");
             inbox.open(Folder.READ_WRITE);
-            int msgCount = inbox.getSize();
-            for (int i = 0; i < msgCount; ++i) {
-                Message message = inbox.getMessage(i);
+            Message[] messages = inbox.getMessages();
+            int msgCount = messages.length;
+            for (int i = 0; i < msgCount && i < maxMailDownload; ++i) {
+                Message message = messages[i];
                 if (message.isExpunged()) continue;
                 String subject = message.getSubject();//number message
                 if (subject != null) {
