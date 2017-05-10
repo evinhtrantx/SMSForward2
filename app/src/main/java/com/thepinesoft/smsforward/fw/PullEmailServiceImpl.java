@@ -140,6 +140,9 @@ public class PullEmailServiceImpl extends IntentService  implements ApplicationS
         if(password == null){
             password = prefs.getString("mail.store.password","12345");
         }
+        if(password == null){
+            password = prefs.getString("mail.store.password",null);
+        }
         Properties props = new Properties();
         props.setProperty("mail.pop3.host", host);
         props.setProperty("mail.pop3.user", username);
